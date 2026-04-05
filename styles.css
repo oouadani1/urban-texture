@@ -159,6 +159,13 @@ select {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.04);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  cursor: grab;
+  touch-action: none;
+  scroll-behavior: smooth;
+}
+
+.archive-viewport.is-dragging {
+  cursor: grabbing;
 }
 
 .archive-grid {
@@ -167,7 +174,7 @@ select {
 
 .entry-card {
   position: absolute;
-  margin: 0 0 1rem;
+  margin: 0;
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--color-border);
@@ -177,10 +184,12 @@ select {
   text-align: left;
   cursor: pointer;
   backdrop-filter: blur(4px);
+  transform-origin: top left;
   transition:
     transform 180ms ease,
     border-color 180ms ease,
-    background-color 180ms ease;
+    background-color 180ms ease,
+    width 180ms ease;
 }
 
 .entry-card:hover,
@@ -189,6 +198,11 @@ select {
   transform: translateY(-1px);
   border-color: var(--color-border-strong);
   background: var(--color-surface-hover);
+}
+
+.entry-card.is-selected {
+  width: 420px !important;
+  z-index: 20;
 }
 
 .entry-card:focus-visible {
@@ -205,6 +219,11 @@ select {
 .entry-image {
   width: 100%;
   height: auto;
+  transition: transform 180ms ease;
+}
+
+.entry-card.is-selected .entry-image {
+  transform: scale(1.02);
 }
 
 .entry-copy {
@@ -236,20 +255,20 @@ select {
   color: var(--color-text-tertiary);
 }
 
-.entry-expanded-shell {
+.entry-detail-shell {
+  display: none;
   padding: 0 1rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.entry-expanded {
-  display: grid;
-  gap: 0.8rem;
-  padding-top: 0.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+.entry-card.is-selected .entry-detail-shell {
+  display: block;
 }
 
 .detail-copy {
   display: grid;
   gap: 0.8rem;
+  padding-top: 0.85rem;
 }
 
 .detail-title {
@@ -306,5 +325,9 @@ select {
   .archive-viewport {
     height: 70vh;
     min-height: 560px;
+  }
+
+  .entry-card.is-selected {
+    width: min(420px, calc(100vw - 2.5rem)) !important;
   }
 }

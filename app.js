@@ -8,17 +8,22 @@ const basePath = window.location.pathname.includes('/urban-texture/')
   ? '/urban-texture'
   : '';
 
-const PLANE_WIDTH = 5600;
-const PLANE_HEIGHT = 4200;
-const CARD_WIDTHS = [290, 320, 350];
-const SLOT_X = 370;
-const SLOT_Y = 620;
-const CARD_JITTER_X = 56;
-const CARD_JITTER_Y = 84;
+const PLANE_WIDTH = 5200;
+const PLANE_HEIGHT = 3800;
+const SLOT_WIDTH = 420;
+const SLOT_HEIGHT = 560;
+const COLLAPSED_WIDTHS = [280, 308, 332];
+const EXPANDED_WIDTH = 420;
+const SLOT_PADDING = 36;
 
 let archiveEntries = [];
 let activeCard = null;
 let shuffleCount = 0;
+let isPointerPanning = false;
+let panStartX = 0;
+let panStartY = 0;
+let panScrollLeft = 0;
+let panScrollTop = 0;
 
 const imagePathCandidates = (entry) => [
   `${basePath}/public/scans/batch%201/jpg/${encodeURIComponent(entry.id)}.jpg`,
@@ -35,40 +40,6 @@ function shuffleArray(values) {
   }
 
   return copy;
-}
-
-function createLayoutSlots(count) {
-  const centerX = Math.floor(PLANE_WIDTH / 2);
-  const centerY = Math.floor(PLANE_HEIGHT / 2);
-  const positions = [];
-  let ring = 0;
-
-  while (positions.length < count) {
-    if (ring === 0) {
-      positions.push({ x: centerX, y: centerY });
-      ring += 1;
-      continue;
-    }
-
-    for (let row = -ring; row <= ring && positions.length < count; row += 1) {
-      for (let col = -ring; col <= ring && positions.length < count; col += 1) {
-        const onEdge = Math.abs(row) === ring || Math.abs(col) === ring;
-
-        if (!onEdge) {
-          continue;
-        }
-
-        positions.push({
-          x: centerX + col * SLOT_X,
-          y: centerY + row * SLOT_Y,
-        });
-      }
-    }
-
-    ring += 1;
-  }
-
-  return shuffleArray(positions);
 }
 
 function toSubtitleLines(entry) {
@@ -118,7 +89,7 @@ function hydrateImage(image, candidates) {
   tryNext();
 }
 
-function buildExpandedDetail(entry) {
+function buildDetailContent(entry) {
   const fragment = detailTemplate.content.cloneNode(true);
   const title = fragment.querySelector('.detail-title');
   const id = fragment.querySelector('.detail-id');
@@ -141,21 +112,36 @@ function buildExpandedDetail(entry) {
   return fragment;
 }
 
+function createLayoutSlots(count) {
+  const cols = Math.max(1, Math.floor((PLANE_WIDTH - SLOT_PADDING * 2) / SLOT_WIDTH));
+  const rows = Math.max(1, Math.ceil(count / cols));
+  const total = cols * rows;
+  const slots = [];
+
+  for (let index = 0; index < total; index += 1) {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    const offsetX = ((row + shuffleCount) % 2) * 42;
+
+    slots.push({
+      x: SLOT_PADDING + col * SLOT_WIDTH + offsetX,
+      y: SLOT_PADDING + row * SLOT_HEIGHT + ((col + shuffleCount) % 3) * 18,
+    });
+  }
+
+  return shuffleArray(slots).slice(0, count);
+}
+
 function collapseCard(card) {
   if (!card) {
     return;
-  }
-
-  const expanded = card.querySelector('.entry-expanded-shell');
-  if (expanded) {
-    expanded.remove();
   }
 
   card.classList.remove('is-selected');
   card.setAttribute('aria-expanded', 'false');
 }
 
-function expandCard(card, entry) {
+function expandCard(card) {
   if (activeCard === card) {
     collapseCard(card);
     activeCard = null;
@@ -163,12 +149,6 @@ function expandCard(card, entry) {
   }
 
   collapseCard(activeCard);
-
-  const expandedShell = document.createElement('div');
-  expandedShell.className = 'entry-expanded-shell';
-  expandedShell.append(buildExpandedDetail(entry));
-
-  card.append(expandedShell);
   card.classList.add('is-selected');
   card.setAttribute('aria-expanded', 'true');
   activeCard = card;
@@ -182,18 +162,17 @@ function renderEntry(entry, index, position) {
   const meta = document.createElement('p');
   const title = document.createElement('h2');
   const subtitle = document.createElement('div');
+  const detailShell = document.createElement('div');
 
-  const width = CARD_WIDTHS[(index + shuffleCount) % CARD_WIDTHS.length];
-  const offsetX = ((index * 37 + shuffleCount * 53) % (CARD_JITTER_X * 2 + 1)) - CARD_JITTER_X;
-  const offsetY = ((index * 61 + shuffleCount * 41) % (CARD_JITTER_Y * 2 + 1)) - CARD_JITTER_Y;
+  const collapsedWidth = COLLAPSED_WIDTHS[(index + shuffleCount) % COLLAPSED_WIDTHS.length];
 
   button.className = 'entry-card';
   button.type = 'button';
   button.setAttribute('aria-label', `${entry.title || 'Untitled'}, ${entry.id}`);
   button.setAttribute('aria-expanded', 'false');
-  button.style.width = `${width}px`;
-  button.style.left = `${Math.max(72, position.x + offsetX - width / 2)}px`;
-  button.style.top = `${Math.max(72, position.y + offsetY - 180)}px`;
+  button.style.width = `${collapsedWidth}px`;
+  button.style.left = `${position.x}px`;
+  button.style.top = `${position.y}px`;
 
   imageWrap.className = 'entry-image-wrap';
   image.className = 'entry-image';
@@ -222,12 +201,15 @@ function renderEntry(entry, index, position) {
     });
   }
 
+  detailShell.className = 'entry-detail-shell';
+  detailShell.append(buildDetailContent(entry));
+
   copy.append(meta, title, subtitle);
   imageWrap.append(image);
-  button.append(imageWrap, copy);
+  button.append(imageWrap, copy, detailShell);
 
   button.addEventListener('click', () => {
-    expandCard(button, entry);
+    expandCard(button);
   });
 
   return button;
@@ -253,6 +235,42 @@ function renderArchive() {
   });
 
   centerViewport();
+}
+
+function onPointerMove(event) {
+  if (!isPointerPanning) {
+    return;
+  }
+
+  const deltaX = event.clientX - panStartX;
+  const deltaY = event.clientY - panStartY;
+
+  archiveViewport.scrollLeft = panScrollLeft - deltaX;
+  archiveViewport.scrollTop = panScrollTop - deltaY;
+}
+
+function stopPointerPan() {
+  isPointerPanning = false;
+  archiveViewport.classList.remove('is-dragging');
+}
+
+function setupPanControls() {
+  archiveViewport.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('.entry-card')) {
+      return;
+    }
+
+    isPointerPanning = true;
+    panStartX = event.clientX;
+    panStartY = event.clientY;
+    panScrollLeft = archiveViewport.scrollLeft;
+    panScrollTop = archiveViewport.scrollTop;
+    archiveViewport.classList.add('is-dragging');
+  });
+
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', stopPointerPan);
+  window.addEventListener('pointercancel', stopPointerPan);
 }
 
 async function loadArchive() {
@@ -290,4 +308,5 @@ window.addEventListener('resize', () => {
   }
 });
 
+setupPanControls();
 loadArchive();
