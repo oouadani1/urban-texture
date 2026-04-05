@@ -64,7 +64,7 @@ function renderDetail(entry) {
 
   title.textContent = entry.title || 'Untitled';
   id.textContent = entry.id;
-  notes.textContent = entry.notes || 'No additional notes.';
+  notes.textContent = entry.notes || 'no additional notes.';
   image.alt = entry.title || entry.id;
 
   hydrateImage(image, imagePathCandidates(entry));
@@ -146,7 +146,7 @@ async function loadArchive() {
       archiveGrid.append(renderEntry(entry, index));
     });
 
-    recordCount.textContent = `${archive.length} entries`;
+    recordCount.textContent = `${archive.length} / 999.99.99`;
     archiveGrid.firstElementChild?.click();
   } catch (error) {
     archiveGrid.innerHTML = `<p class="status-message">${error.message}</p>`;
