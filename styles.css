@@ -1,4 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+@font-face {
+  font-family: "Onset";
+  src: local("Onset");
+  font-display: swap;
+}
 
 :root {
   --color-bg: #eff4ff;
@@ -8,7 +14,7 @@
   --color-text-secondary: #5970a8;
   --color-accent: #0000fe;
   --font-meta: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  --font-soft: "IBM Plex Serif", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --font-soft: "Onset", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
   --panel: rgba(248, 250, 255, 0.92);
   --card: rgba(255, 255, 255, 0.96);
   --card-strong: rgba(230, 238, 255, 0.98);
