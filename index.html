@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Urban Texture Archive</title>
+    <meta
+      name="description"
+      content="A quiet archive of translated urban surfaces."
+    >
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <p class="site-kicker">Urban Texture Archive</p>
+        <div class="site-intro">
+          <h1>A living archive of translated surfaces.</h1>
+          <p>
+            Each scan is the final artifact. Pressed, inked, transferred, and
+            scanned. Not documentation. Not a map. A slow index of contact.
+          </p>
+        </div>
+        <div class="site-meta">
+          <p id="record-count">Loading archive...</p>
+          <p class="site-note">Sample rendering for GitHub Pages</p>
+        </div>
+      </header>
+
+      <main class="archive-layout">
+        <section aria-label="Archive entries" class="archive-panel">
+          <div class="archive-grid" id="archive-grid"></div>
+        </section>
+
+        <aside class="detail-panel" aria-live="polite">
+          <div class="detail-panel__inner">
+            <p class="detail-eyebrow">Selected scan</p>
+            <div id="detail-empty" class="detail-empty">
+              <p>Select a scan to read its trace.</p>
+            </div>
+            <article id="detail-content" class="detail-content" hidden></article>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <template id="detail-template">
+      <figure class="detail-figure">
+        <img alt="" class="detail-image">
+      </figure>
+      <div class="detail-copy">
+        <h2 class="detail-title"></h2>
+        <p class="detail-id"></p>
+        <p class="detail-notes"></p>
+        <dl class="detail-metadata"></dl>
+      </div>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+

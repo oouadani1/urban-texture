@@ -1,0 +1,5 @@
+.DS_Store
+public/scans/**/.DS_Store
+public/scans/**/*.pdf
+public/scans/**/.tmp-render/
+
