@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
 :root {
   --color-bg: #0b1f3a;
   --color-surface: #102a4a;
@@ -5,6 +7,8 @@
   --color-text-primary: #f4f1ea;
   --color-text-secondary: #a8b6c8;
   --color-accent: #2c6fff;
+  --font-meta: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-soft: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
   --panel: rgba(16, 42, 74, 0.84);
   --card: rgba(16, 42, 74, 0.9);
   --card-strong: rgba(22, 55, 96, 0.96);
@@ -29,7 +33,7 @@ body {
   min-height: 100vh;
   color: var(--color-text-primary);
   background: var(--color-bg);
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  font-family: var(--font-soft);
 }
 
 img {
@@ -65,7 +69,7 @@ select {
 .detail-id,
 .detail-metadata dt {
   margin: 0;
-  font-family: "Avenir Next Condensed", "Arial Narrow", Arial, sans-serif;
+  font-family: var(--font-meta);
   font-size: 0.84rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -75,6 +79,7 @@ select {
 .site-intro h1 {
   margin: 0;
   max-width: 12ch;
+  font-family: var(--font-soft);
   font-size: clamp(2.3rem, 4vw, 4.6rem);
   line-height: 0.96;
   font-weight: 500;
@@ -85,6 +90,7 @@ select {
 .detail-metadata dd,
 .detail-empty p {
   margin: 0;
+  font-family: var(--font-soft);
   font-size: 1rem;
   line-height: 1.6;
   color: rgba(244, 241, 234, 0.84);
@@ -177,6 +183,7 @@ select {
 
 .entry-title {
   margin: 0;
+  font-family: var(--font-meta);
   font-size: 1.18rem;
   line-height: 1.15;
   font-weight: 500;
@@ -184,6 +191,7 @@ select {
 
 .entry-subtitle {
   margin: 0;
+  font-family: var(--font-soft);
   font-size: 0.96rem;
   line-height: 1.45;
   color: rgba(168, 182, 200, 0.86);
@@ -232,6 +240,7 @@ select {
 
 .detail-title {
   margin: 0;
+  font-family: var(--font-soft);
   font-size: clamp(1.7rem, 2.2vw, 2.6rem);
   line-height: 0.98;
   font-weight: 500;
@@ -248,6 +257,7 @@ select {
 
 .detail-metadata dd {
   margin: 0;
+  font-family: var(--font-soft);
 }
 
 .status-message {
