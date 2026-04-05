@@ -1,0 +1,15 @@
+{
+  "name": "urban-texture",
+  "private": true,
+  "scripts": {
+    "convert:scans": "node scripts/convert-scans.js",
+    "sync:data": "node scripts/sync-archive.js"
+  },
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
