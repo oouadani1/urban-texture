@@ -146,7 +146,7 @@ async function loadArchive() {
       archiveGrid.append(renderEntry(entry, index));
     });
 
-    recordCount.textContent = `${archive.length} / 999.99.99`;
+    recordCount.textContent = `${archive.length} / 999,999`;
     archiveGrid.firstElementChild?.click();
   } catch (error) {
     archiveGrid.innerHTML = `<p class="status-message">${error.message}</p>`;
