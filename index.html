@@ -22,22 +22,21 @@
         </div>
         <div class="site-meta">
           <p id="record-count">Loading archive...</p>
+          <button id="shuffle-button" class="archive-control" type="button">shuffle</button>
         </div>
       </header>
 
       <main class="archive-layout">
         <section aria-label="Archive entries" class="archive-panel">
-          <div class="archive-grid" id="archive-grid"></div>
-          <div id="archive-sentinel" class="archive-sentinel" aria-hidden="true"></div>
+          <div class="archive-viewport" id="archive-viewport">
+            <div class="archive-grid" id="archive-grid"></div>
+          </div>
         </section>
       </main>
     </div>
 
     <template id="detail-template">
       <div class="entry-expanded">
-        <figure class="detail-figure">
-          <img alt="" class="detail-image">
-        </figure>
         <div class="detail-copy">
           <h2 class="detail-title"></h2>
           <p class="detail-id"></p>

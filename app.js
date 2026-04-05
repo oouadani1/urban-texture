@@ -1,18 +1,24 @@
 const archiveGrid = document.getElementById('archive-grid');
-const archiveSentinel = document.getElementById('archive-sentinel');
+const archiveViewport = document.getElementById('archive-viewport');
 const recordCount = document.getElementById('record-count');
+const shuffleButton = document.getElementById('shuffle-button');
 const detailTemplate = document.getElementById('detail-template');
 
 const basePath = window.location.pathname.includes('/urban-texture/')
   ? '/urban-texture'
   : '';
 
-const PAGE_SIZE = 9;
+const PLANE_WIDTH = 5600;
+const PLANE_HEIGHT = 4200;
+const CARD_WIDTHS = [290, 320, 350];
+const SLOT_X = 370;
+const SLOT_Y = 620;
+const CARD_JITTER_X = 56;
+const CARD_JITTER_Y = 84;
 
 let archiveEntries = [];
-let renderedCount = 0;
 let activeCard = null;
-let observer = null;
+let shuffleCount = 0;
 
 const imagePathCandidates = (entry) => [
   `${basePath}/public/scans/batch%201/jpg/${encodeURIComponent(entry.id)}.jpg`,
@@ -20,7 +26,52 @@ const imagePathCandidates = (entry) => [
   entry.scanImage ? `${basePath}${entry.scanImage}` : '',
 ].filter(Boolean);
 
-function toSubtitle(entry) {
+function shuffleArray(values) {
+  const copy = [...values];
+
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[randomIndex]] = [copy[randomIndex], copy[index]];
+  }
+
+  return copy;
+}
+
+function createLayoutSlots(count) {
+  const centerX = Math.floor(PLANE_WIDTH / 2);
+  const centerY = Math.floor(PLANE_HEIGHT / 2);
+  const positions = [];
+  let ring = 0;
+
+  while (positions.length < count) {
+    if (ring === 0) {
+      positions.push({ x: centerX, y: centerY });
+      ring += 1;
+      continue;
+    }
+
+    for (let row = -ring; row <= ring && positions.length < count; row += 1) {
+      for (let col = -ring; col <= ring && positions.length < count; col += 1) {
+        const onEdge = Math.abs(row) === ring || Math.abs(col) === ring;
+
+        if (!onEdge) {
+          continue;
+        }
+
+        positions.push({
+          x: centerX + col * SLOT_X,
+          y: centerY + row * SLOT_Y,
+        });
+      }
+    }
+
+    ring += 1;
+  }
+
+  return shuffleArray(positions);
+}
+
+function toSubtitleLines(entry) {
   const lines = [];
 
   if (entry.notes) {
@@ -69,7 +120,6 @@ function hydrateImage(image, candidates) {
 
 function buildExpandedDetail(entry) {
   const fragment = detailTemplate.content.cloneNode(true);
-  const image = fragment.querySelector('.detail-image');
   const title = fragment.querySelector('.detail-title');
   const id = fragment.querySelector('.detail-id');
   const notes = fragment.querySelector('.detail-notes');
@@ -78,9 +128,6 @@ function buildExpandedDetail(entry) {
   title.textContent = entry.title || 'Untitled';
   id.textContent = entry.id;
   notes.textContent = entry.notes || 'no additional notes.';
-  image.alt = entry.title || entry.id;
-
-  hydrateImage(image, imagePathCandidates(entry));
 
   toMetadata(entry).forEach(([label, value]) => {
     const dt = document.createElement('dt');
@@ -127,7 +174,7 @@ function expandCard(card, entry) {
   activeCard = card;
 }
 
-function renderEntry(entry, index) {
+function renderEntry(entry, index, position) {
   const button = document.createElement('button');
   const imageWrap = document.createElement('div');
   const image = document.createElement('img');
@@ -136,14 +183,21 @@ function renderEntry(entry, index) {
   const title = document.createElement('h2');
   const subtitle = document.createElement('div');
 
+  const width = CARD_WIDTHS[(index + shuffleCount) % CARD_WIDTHS.length];
+  const offsetX = ((index * 37 + shuffleCount * 53) % (CARD_JITTER_X * 2 + 1)) - CARD_JITTER_X;
+  const offsetY = ((index * 61 + shuffleCount * 41) % (CARD_JITTER_Y * 2 + 1)) - CARD_JITTER_Y;
+
   button.className = 'entry-card';
   button.type = 'button';
   button.setAttribute('aria-label', `${entry.title || 'Untitled'}, ${entry.id}`);
   button.setAttribute('aria-expanded', 'false');
+  button.style.width = `${width}px`;
+  button.style.left = `${Math.max(72, position.x + offsetX - width / 2)}px`;
+  button.style.top = `${Math.max(72, position.y + offsetY - 180)}px`;
 
   imageWrap.className = 'entry-image-wrap';
   image.className = 'entry-image';
-  image.loading = index < 6 ? 'eager' : 'lazy';
+  image.loading = index < 8 ? 'eager' : 'lazy';
   image.alt = entry.title || entry.id;
   hydrateImage(image, imagePathCandidates(entry));
 
@@ -155,7 +209,7 @@ function renderEntry(entry, index) {
   meta.textContent = entry.id;
   title.textContent = entry.title || 'Untitled';
 
-  const subtitleLines = toSubtitle(entry);
+  const subtitleLines = toSubtitleLines(entry);
 
   if (subtitleLines.length === 0) {
     subtitle.textContent = 'Archive entry';
@@ -179,34 +233,26 @@ function renderEntry(entry, index) {
   return button;
 }
 
-function renderNextBatch() {
-  const nextEntries = archiveEntries.slice(renderedCount, renderedCount + PAGE_SIZE);
-
-  nextEntries.forEach((entry, index) => {
-    archiveGrid.append(renderEntry(entry, renderedCount + index));
-  });
-
-  renderedCount += nextEntries.length;
-
-  if (renderedCount >= archiveEntries.length && observer) {
-    observer.disconnect();
-    archiveSentinel.hidden = true;
-  }
+function centerViewport() {
+  const left = Math.max(0, PLANE_WIDTH / 2 - archiveViewport.clientWidth / 2);
+  const top = Math.max(0, PLANE_HEIGHT / 2 - archiveViewport.clientHeight / 2);
+  archiveViewport.scrollTo({ left, top, behavior: 'auto' });
 }
 
-function setupInfiniteScroll() {
-  observer = new IntersectionObserver(
-    (entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        renderNextBatch();
-      }
-    },
-    {
-      rootMargin: '1200px 0px',
-    }
-  );
+function renderArchive() {
+  archiveGrid.innerHTML = '';
+  activeCard = null;
+  archiveGrid.style.width = `${PLANE_WIDTH}px`;
+  archiveGrid.style.height = `${PLANE_HEIGHT}px`;
 
-  observer.observe(archiveSentinel);
+  const shuffledEntries = shuffleArray(archiveEntries);
+  const positions = createLayoutSlots(shuffledEntries.length);
+
+  shuffledEntries.forEach((entry, index) => {
+    archiveGrid.append(renderEntry(entry, index, positions[index]));
+  });
+
+  centerViewport();
 }
 
 async function loadArchive() {
@@ -222,22 +268,26 @@ async function loadArchive() {
     if (!Array.isArray(archiveEntries) || archiveEntries.length === 0) {
       archiveGrid.innerHTML = '<p class="status-message">No archive entries found.</p>';
       recordCount.textContent = 'Nº 0 / [   ]';
-      archiveSentinel.hidden = true;
       return;
     }
 
-    archiveGrid.innerHTML = '';
-    renderedCount = 0;
-    activeCard = null;
     recordCount.textContent = `Nº ${archiveEntries.length} / [   ]`;
-
-    renderNextBatch();
-    setupInfiniteScroll();
+    renderArchive();
   } catch (error) {
     archiveGrid.innerHTML = `<p class="status-message">${error.message}</p>`;
     recordCount.textContent = 'Archive unavailable';
-    archiveSentinel.hidden = true;
   }
 }
+
+shuffleButton.addEventListener('click', () => {
+  shuffleCount += 1;
+  renderArchive();
+});
+
+window.addEventListener('resize', () => {
+  if (archiveEntries.length > 0) {
+    centerViewport();
+  }
+});
 
 loadArchive();
