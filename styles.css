@@ -1,22 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:wght@400;500;600&display=swap");
 
 :root {
-  --color-bg: #0b1f3a;
-  --color-surface: #102a4a;
-  --color-surface-hover: #163760;
-  --color-text-primary: #f4f1ea;
-  --color-text-secondary: #a8b6c8;
-  --color-accent: #2c6fff;
+  --color-bg: #0b2b73;
+  --color-surface: #0f378b;
+  --color-surface-hover: #1746a2;
+  --color-text-primary: #eef3f8;
+  --color-text-secondary: #b7c5d8;
+  --color-accent: #043fbf;
   --font-meta: "IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  --font-soft: "Cormorant Garamond", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
-  --panel: rgba(16, 42, 74, 0.84);
-  --card: rgba(16, 42, 74, 0.9);
-  --card-strong: rgba(22, 55, 96, 0.96);
-  --border: rgba(168, 182, 200, 0.18);
+  --font-soft: "IBM Plex Serif", "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --panel: rgba(15, 55, 139, 0.82);
+  --card: rgba(15, 55, 139, 0.9);
+  --card-strong: rgba(23, 70, 162, 0.95);
+  --border: rgba(183, 197, 216, 0.22);
   --text: var(--color-text-primary);
   --muted: var(--color-text-secondary);
-  --shadow: 0 22px 60px rgba(5, 14, 27, 0.28);
-  --shadow-soft: 0 14px 30px rgba(5, 14, 27, 0.2);
+  --shadow: 0 22px 60px rgba(3, 18, 50, 0.18);
+  --shadow-soft: 0 14px 30px rgba(3, 18, 50, 0.12);
 }
 
 * {
@@ -93,7 +93,7 @@ select {
   font-family: var(--font-soft);
   font-size: 1rem;
   line-height: 1.6;
-  color: rgba(244, 241, 234, 0.84);
+  color: rgba(238, 243, 248, 0.84);
 }
 
 .site-intro p {
@@ -155,19 +155,19 @@ select {
 .entry-card:focus-visible,
 .entry-card.is-selected {
   transform: translateY(-3px);
-  border-color: rgba(168, 182, 200, 0.24);
+  border-color: rgba(183, 197, 216, 0.28);
   background: var(--color-surface-hover);
-  box-shadow: 0 18px 32px rgba(5, 14, 27, 0.24);
+  box-shadow: 0 18px 32px rgba(3, 18, 50, 0.16);
 }
 
 .entry-card:focus-visible {
-  outline: 2px solid rgba(44, 111, 255, 0.42);
+  outline: 2px solid rgba(4, 63, 191, 0.45);
   outline-offset: 3px;
 }
 
 .entry-image-wrap {
   overflow: hidden;
-  background: rgba(22, 55, 96, 0.24);
+  background: rgba(9, 39, 103, 0.2);
 }
 
 .entry-image {
@@ -194,7 +194,7 @@ select {
   font-family: var(--font-soft);
   font-size: 0.96rem;
   line-height: 1.45;
-  color: rgba(168, 182, 200, 0.86);
+  color: rgba(183, 197, 216, 0.88);
 }
 
 .detail-panel {
@@ -211,9 +211,9 @@ select {
   display: grid;
   place-items: center;
   text-align: center;
-  border: 1px dashed rgba(168, 182, 200, 0.22);
+  border: 1px dashed rgba(183, 197, 216, 0.2);
   border-radius: 18px;
-  background: rgba(11, 31, 58, 0.42);
+  background: rgba(9, 39, 103, 0.3);
 }
 
 .detail-content {
@@ -225,7 +225,7 @@ select {
   margin: 0;
   overflow: hidden;
   border-radius: 18px;
-  background: rgba(22, 55, 96, 0.32);
+  background: rgba(9, 39, 103, 0.24);
 }
 
 .detail-image {
@@ -252,7 +252,7 @@ select {
   gap: 0.55rem 0.9rem;
   margin: 0;
   padding-top: 0.8rem;
-  border-top: 1px solid rgba(168, 182, 200, 0.14);
+  border-top: 1px solid rgba(183, 197, 216, 0.16);
 }
 
 .detail-metadata dd {
@@ -264,7 +264,7 @@ select {
   margin: 0;
   padding: 1rem;
   border-radius: 16px;
-  background: rgba(16, 42, 74, 0.72);
+  background: rgba(15, 55, 139, 0.72);
   color: var(--muted);
 }
 
