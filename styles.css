@@ -1,14 +1,18 @@
 :root {
-  --bg: #ede5d8;
-  --bg-accent: rgba(114, 92, 61, 0.12);
-  --panel: rgba(248, 243, 234, 0.84);
-  --card: rgba(253, 250, 245, 0.88);
-  --card-strong: rgba(255, 252, 248, 0.96);
-  --border: rgba(70, 52, 31, 0.18);
-  --text: #2f2418;
-  --muted: #6d5944;
-  --shadow: 0 22px 60px rgba(66, 46, 26, 0.12);
-  --shadow-soft: 0 14px 30px rgba(66, 46, 26, 0.08);
+  --color-bg: #0b1f3a;
+  --color-surface: #102a4a;
+  --color-surface-hover: #163760;
+  --color-text-primary: #f4f1ea;
+  --color-text-secondary: #a8b6c8;
+  --color-accent: #2c6fff;
+  --panel: rgba(16, 42, 74, 0.84);
+  --card: rgba(16, 42, 74, 0.9);
+  --card-strong: rgba(22, 55, 96, 0.96);
+  --border: rgba(168, 182, 200, 0.18);
+  --text: var(--color-text-primary);
+  --muted: var(--color-text-secondary);
+  --shadow: 0 22px 60px rgba(5, 14, 27, 0.28);
+  --shadow-soft: 0 14px 30px rgba(5, 14, 27, 0.2);
 }
 
 * {
@@ -23,11 +27,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  color: var(--text);
-  background:
-    radial-gradient(circle at top left, var(--bg-accent), transparent 34%),
-    radial-gradient(circle at bottom right, rgba(84, 69, 45, 0.09), transparent 28%),
-    var(--bg);
+  color: var(--color-text-primary);
+  background: var(--color-bg);
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
 }
 
@@ -86,7 +87,7 @@ select {
   margin: 0;
   font-size: 1rem;
   line-height: 1.6;
-  color: rgba(47, 36, 24, 0.86);
+  color: rgba(244, 241, 234, 0.84);
 }
 
 .site-intro p {
@@ -148,19 +149,19 @@ select {
 .entry-card:focus-visible,
 .entry-card.is-selected {
   transform: translateY(-3px);
-  border-color: rgba(70, 52, 31, 0.24);
-  background: var(--card-strong);
-  box-shadow: 0 18px 32px rgba(66, 46, 26, 0.14);
+  border-color: rgba(168, 182, 200, 0.24);
+  background: var(--color-surface-hover);
+  box-shadow: 0 18px 32px rgba(5, 14, 27, 0.24);
 }
 
 .entry-card:focus-visible {
-  outline: 2px solid rgba(70, 52, 31, 0.36);
+  outline: 2px solid rgba(44, 111, 255, 0.42);
   outline-offset: 3px;
 }
 
 .entry-image-wrap {
   overflow: hidden;
-  background: rgba(190, 176, 153, 0.18);
+  background: rgba(22, 55, 96, 0.24);
 }
 
 .entry-image {
@@ -185,7 +186,7 @@ select {
   margin: 0;
   font-size: 0.96rem;
   line-height: 1.45;
-  color: rgba(47, 36, 24, 0.74);
+  color: rgba(168, 182, 200, 0.86);
 }
 
 .detail-panel {
@@ -202,9 +203,9 @@ select {
   display: grid;
   place-items: center;
   text-align: center;
-  border: 1px dashed rgba(70, 52, 31, 0.2);
+  border: 1px dashed rgba(168, 182, 200, 0.22);
   border-radius: 18px;
-  background: rgba(255, 253, 249, 0.45);
+  background: rgba(11, 31, 58, 0.42);
 }
 
 .detail-content {
@@ -216,7 +217,7 @@ select {
   margin: 0;
   overflow: hidden;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(22, 55, 96, 0.32);
 }
 
 .detail-image {
@@ -242,7 +243,7 @@ select {
   gap: 0.55rem 0.9rem;
   margin: 0;
   padding-top: 0.8rem;
-  border-top: 1px solid rgba(70, 52, 31, 0.12);
+  border-top: 1px solid rgba(168, 182, 200, 0.14);
 }
 
 .detail-metadata dd {
@@ -253,7 +254,7 @@ select {
   margin: 0;
   padding: 1rem;
   border-radius: 16px;
-  background: rgba(255, 250, 244, 0.72);
+  background: rgba(16, 42, 74, 0.72);
   color: var(--muted);
 }
 
@@ -292,4 +293,3 @@ select {
     column-count: 1;
   }
 }
-
