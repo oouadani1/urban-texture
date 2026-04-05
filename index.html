@@ -28,33 +28,25 @@
       <main class="archive-layout">
         <section aria-label="Archive entries" class="archive-panel">
           <div class="archive-grid" id="archive-grid"></div>
+          <div id="archive-sentinel" class="archive-sentinel" aria-hidden="true"></div>
         </section>
-
-        <aside class="detail-panel" aria-live="polite">
-          <div class="detail-panel__inner">
-            <p class="detail-eyebrow">Selected index</p>
-            <div id="detail-empty" class="detail-empty">
-              <p>in progres...</p>
-            </div>
-            <article id="detail-content" class="detail-content" hidden></article>
-          </div>
-        </aside>
       </main>
     </div>
 
     <template id="detail-template">
-      <figure class="detail-figure">
-        <img alt="" class="detail-image">
-      </figure>
-      <div class="detail-copy">
-        <h2 class="detail-title"></h2>
-        <p class="detail-id"></p>
-        <p class="detail-notes"></p>
-        <dl class="detail-metadata"></dl>
+      <div class="entry-expanded">
+        <figure class="detail-figure">
+          <img alt="" class="detail-image">
+        </figure>
+        <div class="detail-copy">
+          <h2 class="detail-title"></h2>
+          <p class="detail-id"></p>
+          <p class="detail-notes"></p>
+          <dl class="detail-metadata"></dl>
+        </div>
       </div>
     </template>
 
     <script src="./app.js"></script>
   </body>
 </html>
-

@@ -1,12 +1,18 @@
 const archiveGrid = document.getElementById('archive-grid');
+const archiveSentinel = document.getElementById('archive-sentinel');
 const recordCount = document.getElementById('record-count');
-const detailEmpty = document.getElementById('detail-empty');
-const detailContent = document.getElementById('detail-content');
 const detailTemplate = document.getElementById('detail-template');
 
 const basePath = window.location.pathname.includes('/urban-texture/')
   ? '/urban-texture'
   : '';
+
+const PAGE_SIZE = 9;
+
+let archiveEntries = [];
+let renderedCount = 0;
+let activeCard = null;
+let observer = null;
 
 const imagePathCandidates = (entry) => [
   `${basePath}/public/scans/batch%201/jpg/${encodeURIComponent(entry.id)}.jpg`,
@@ -15,8 +21,19 @@ const imagePathCandidates = (entry) => [
 ].filter(Boolean);
 
 function toSubtitle(entry) {
-  const parts = [entry.locationName, entry.city, entry.country].filter(Boolean);
-  return parts.join(' · ');
+  const lines = [];
+
+  if (entry.notes) {
+    lines.push(entry.notes);
+  }
+
+  const locationLine = [entry.city, entry.country].filter(Boolean).join(', ');
+
+  if (locationLine) {
+    lines.push(locationLine);
+  }
+
+  return lines;
 }
 
 function toMetadata(entry) {
@@ -50,11 +67,7 @@ function hydrateImage(image, candidates) {
   tryNext();
 }
 
-function renderDetail(entry) {
-  detailEmpty.hidden = true;
-  detailContent.hidden = false;
-  detailContent.innerHTML = '';
-
+function buildExpandedDetail(entry) {
   const fragment = detailTemplate.content.cloneNode(true);
   const image = fragment.querySelector('.detail-image');
   const title = fragment.querySelector('.detail-title');
@@ -78,7 +91,40 @@ function renderDetail(entry) {
     metadata.append(dt, dd);
   });
 
-  detailContent.append(fragment);
+  return fragment;
+}
+
+function collapseCard(card) {
+  if (!card) {
+    return;
+  }
+
+  const expanded = card.querySelector('.entry-expanded-shell');
+  if (expanded) {
+    expanded.remove();
+  }
+
+  card.classList.remove('is-selected');
+  card.setAttribute('aria-expanded', 'false');
+}
+
+function expandCard(card, entry) {
+  if (activeCard === card) {
+    collapseCard(card);
+    activeCard = null;
+    return;
+  }
+
+  collapseCard(activeCard);
+
+  const expandedShell = document.createElement('div');
+  expandedShell.className = 'entry-expanded-shell';
+  expandedShell.append(buildExpandedDetail(entry));
+
+  card.append(expandedShell);
+  card.classList.add('is-selected');
+  card.setAttribute('aria-expanded', 'true');
+  activeCard = card;
 }
 
 function renderEntry(entry, index) {
@@ -88,11 +134,12 @@ function renderEntry(entry, index) {
   const copy = document.createElement('div');
   const meta = document.createElement('p');
   const title = document.createElement('h2');
-  const subtitle = document.createElement('p');
+  const subtitle = document.createElement('div');
 
   button.className = 'entry-card';
   button.type = 'button';
   button.setAttribute('aria-label', `${entry.title || 'Untitled'}, ${entry.id}`);
+  button.setAttribute('aria-expanded', 'false');
 
   imageWrap.className = 'entry-image-wrap';
   image.className = 'entry-image';
@@ -107,22 +154,59 @@ function renderEntry(entry, index) {
 
   meta.textContent = entry.id;
   title.textContent = entry.title || 'Untitled';
-  subtitle.textContent = toSubtitle(entry) || 'Archive entry';
+
+  const subtitleLines = toSubtitle(entry);
+
+  if (subtitleLines.length === 0) {
+    subtitle.textContent = 'Archive entry';
+  } else {
+    subtitleLines.forEach((line) => {
+      const lineElement = document.createElement('span');
+      lineElement.className = 'entry-subtitle-line';
+      lineElement.textContent = line;
+      subtitle.append(lineElement);
+    });
+  }
 
   copy.append(meta, title, subtitle);
   imageWrap.append(image);
   button.append(imageWrap, copy);
 
   button.addEventListener('click', () => {
-    document.querySelectorAll('.entry-card.is-selected').forEach((card) => {
-      card.classList.remove('is-selected');
-    });
-
-    button.classList.add('is-selected');
-    renderDetail(entry);
+    expandCard(button, entry);
   });
 
   return button;
+}
+
+function renderNextBatch() {
+  const nextEntries = archiveEntries.slice(renderedCount, renderedCount + PAGE_SIZE);
+
+  nextEntries.forEach((entry, index) => {
+    archiveGrid.append(renderEntry(entry, renderedCount + index));
+  });
+
+  renderedCount += nextEntries.length;
+
+  if (renderedCount >= archiveEntries.length && observer) {
+    observer.disconnect();
+    archiveSentinel.hidden = true;
+  }
+}
+
+function setupInfiniteScroll() {
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        renderNextBatch();
+      }
+    },
+    {
+      rootMargin: '1200px 0px',
+    }
+  );
+
+  observer.observe(archiveSentinel);
 }
 
 async function loadArchive() {
@@ -133,24 +217,26 @@ async function loadArchive() {
       throw new Error(`Archive request failed with status ${response.status}`);
     }
 
-    const archive = await response.json();
+    archiveEntries = await response.json();
 
-    if (!Array.isArray(archive) || archive.length === 0) {
+    if (!Array.isArray(archiveEntries) || archiveEntries.length === 0) {
       archiveGrid.innerHTML = '<p class="status-message">No archive entries found.</p>';
-      recordCount.textContent = '0 entries';
+      recordCount.textContent = 'Nº 0 / [   ]';
+      archiveSentinel.hidden = true;
       return;
     }
 
     archiveGrid.innerHTML = '';
-    archive.forEach((entry, index) => {
-      archiveGrid.append(renderEntry(entry, index));
-    });
+    renderedCount = 0;
+    activeCard = null;
+    recordCount.textContent = `Nº ${archiveEntries.length} / [   ]`;
 
-    recordCount.textContent = `Nº ${archive.length} / [   ]`;
-    archiveGrid.firstElementChild?.click();
+    renderNextBatch();
+    setupInfiniteScroll();
   } catch (error) {
     archiveGrid.innerHTML = `<p class="status-message">${error.message}</p>`;
     recordCount.textContent = 'Archive unavailable';
+    archiveSentinel.hidden = true;
   }
 }
 
